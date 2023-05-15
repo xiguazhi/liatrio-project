@@ -12,6 +12,12 @@ env:
 jobs:
   docker:
     runs-on: ubuntu-latest
+    environment:
+      name: dev
+    defaults:
+      run:
+        shell: bash
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
