@@ -1,0 +1,35 @@
+name: Image Builder
+
+on:
+  push:
+    branches:
+      - 'main'
+
+env:
+  ACR_REGISTRY_NAME:
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_TENANT_ID: ${{ secrets.TENANT_ID}}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.ACR_REGISTRY_NAME }}.azurecr.io
+          username: ${{ env.ARM_CLIENT_ID }}
+          password: ${{ env.ARM_CLIENT_SECRET }}
+
+      - name: Build docker image
+        run: docker build .
+
+      - name: Push docker image to ACR
+        run: |
+          docker tag liatriodemo:latest ${{ env.ACR_REGISTRY_NAME }}.azurecr.io/liatriodemo:${{ github.sha }}
+          docker push ${{ env.ACR_REGISTRY_NAME }}.azurecr.io/liatriodemo:${{ github.sha }}
